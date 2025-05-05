@@ -1174,7 +1174,7 @@
             <div class="step-content">
                 <h3>NDWI Calculation</h3>
                 <p>The Normalized Difference Water Index (NDWI) is calculated using the green and near-infrared (NIR) bands from the satellite imagery. This spectral index enhances the presence of water features while suppressing vegetation and soil signals.</p>
-                <div class="ndwi-example">
+<!--                 <div class="ndwi-example">
                     <figure class="ndwi-image">
                         <img src="visualized_result_Cosumnes_River_Cosumnes_-_Badger_config_3_2022_07_333-1260.png" alt="Original satellite image">
                         <figcaption>Cosumnes - Badger Reach: Dry example (August 2022)</figcaption>
@@ -1183,7 +1183,7 @@
                         <img src="visualized_result_Cosumnes_River_Cosumnes_-_Badger_config_3_2023_03_333-1260.png" alt="NDWI processed image">
                         <figcaption>Cosumnes - Badger Reach: Wet example (March 2023)</figcaption>
                     </figure>
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -1193,6 +1193,16 @@
                     <div class="step-content">
                         <h3>Thresholding & Water Mask Generation</h3>
                         <p>Advanced thresholding techniques like Otsu's method are applied to the NDWI images to separate water from non-water pixels. The result is a binary water mask that precisely delineates the water extent at the time of image capture.</p>
+                        <div class="ndwi-example">
+                    <figure class="ndwi-image">
+                        <img src="visualized_result_Cosumnes_River_Cosumnes_-_Badger_config_3_2022_07_333-1260.png" alt="Original satellite image">
+                        <figcaption>Cosumnes - Badger Reach: Dry example (August 2022)</figcaption>
+                    </figure>
+                    <figure class="ndwi-image">
+                        <img src="visualized_result_Cosumnes_River_Cosumnes_-_Badger_config_3_2023_03_333-1260.png" alt="NDWI processed image">
+                        <figcaption>Cosumnes - Badger Reach: Wet example (March 2023)</figcaption>
+                    </figure>
+                </div>
                     </div>
                 </div>
                <div class="method-step">
