@@ -1,79 +1,1643 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FlowZero – Water Monitoring from Space</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowZero - Leveraging Satellite Imagery for Proactive Water Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
-      body {
-        background: url('https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1740&q=80') no-repeat center center fixed;
-        background-size: cover;
-      }
-      .overlay {
-        background-color: rgba(0, 0, 0, 0.5);
-      }
-    </style>
-  </head>
-  <body class="text-white font-sans">
+        /* Base styles and variables */
+        :root {
+            --primary-color: #1a5276; /* Deep blue */
+            --secondary-color: #27ae60; /* Green */
+            --accent-color: #3498db; /* Light blue */
+            --text-light: #f8f9fa;
+            --text-dark: #2c3e50;
+            --gradient-overlay: linear-gradient(135deg, rgba(26, 82, 118, 0.9), rgba(39, 174, 96, 0.85));
+            --card-bg: rgba(255, 255, 255, 0.95);
+        }
 
-    <div class="overlay min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-4 drop-shadow-lg">
-        🌊 FlowZero
-      </h1>
-      <p class="text-xl md:text-2xl max-w-2xl mb-8 drop-shadow-md">
-        Leveraging satellite imagery and open-source tools for proactive, affordable water management.
-      </p>
-      <a href="#about" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition transform hover:scale-105 shadow-lg">
-        Learn More
-      </a>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-color: #f8f9fa;
+        }
+
+        /* Animated background */
+        .bg-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1508108712903-49b7ef9b1df8');
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.8);
+            z-index: -2;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(52, 152, 219, 0.1);
+            transform: scale(0);
+            animation: ripple 8s infinite;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar.scrolled {
+            padding: 0.8rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--secondary-color);
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+            color: var(--accent-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            width: 100%;
+            height: 2px;
+            background-color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-overlay);
+            z-index: -1;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            color: var(--text-light);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-indicator i {
+            color: white;
+            font-size: 2rem;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Core Features */
+        .features {
+            padding: 6rem 2rem;
+            background-color: white;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--secondary-color);
+        }
+
+        .section-header p {
+            max-width: 700px;
+            margin: 0 auto;
+            color: #777;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 70px;
+            width: 70px;
+            border-radius: 50%;
+            background: var(--gradient-overlay);
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        /* About Section */
+        .about {
+            padding: 6rem 2rem;
+            background-color: #f8f9fa;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .about-text h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .about-text p {
+            margin-bottom: 1.5rem;
+        }
+
+        .about-image {
+            position: relative;
+            height: 100%;
+            min-height: 400px;
+        }
+
+        .about-image img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .highlight {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        /* Methodology Section */
+        .methodology {
+            padding: 6rem 2rem;
+            background-color: white;
+        }
+
+        .methodology-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .methods-container {
+            margin-top: 3rem;
+        }
+
+        .method-step {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2rem;
+            margin-bottom: 4rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .method-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--gradient-overlay);
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .step-content h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .ndwi-example {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .ndwi-image {
+            flex: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .ndwi-image img {
+            width: 100%;
+            height: auto;
+        }
+
+        .ndwi-image figcaption {
+            padding: 1rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+
+        /* Case Study Section */
+        .case-study {
+            padding: 6rem 2rem;
+            background-color: #f8f9fa;
+        }
+
+        .case-study-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .comparison-slider {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            margin: 3rem 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .comparison-slider img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slider-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .comparison-slider:hover .slider-overlay {
+            opacity: 1;
+        }
+
+        .time-series {
+            margin-top: 4rem;
+        }
+
+        .time-series h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        /* CLI Section */
+        .cli {
+            padding: 6rem 2rem;
+            background-color: white;
+        }
+
+        .cli-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .terminal {
+            background-color: #2c3e50;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 3rem 0;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            font-family: 'Courier New', Courier, monospace;
+            color: #f8f9fa;
+            overflow-x: auto;
+        }
+
+        .terminal pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .command {
+            color: #27ae60;
+        }
+
+        .prompt {
+            color: #e74c3c;
+        }
+
+        .output {
+            color: #3498db;
+        }
+
+        .cli-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+            background-color: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .cli-table th,
+        .cli-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cli-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .cli-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .cli-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        /* Data & Outputs Section */
+        .data-outputs {
+            padding: 6rem 2rem;
+            background-color: #f8f9fa;
+        }
+
+        .data-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .output-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .output-item {
+            position: relative;
+            height: 250px;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .output-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .output-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .output-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-overlay);
+            opacity: 0.5;
+        }
+
+        .output-item h4 {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            color: white;
+            font-size: 1.2rem;
+            z-index: 1;
+        }
+
+        /* Get Involved Section */
+        .get-involved {
+            padding: 6rem 2rem;
+            background-color: white;
+        }
+
+        .involved-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contribute-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .contribute-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .contribute-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .contribute-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 80px;
+            width: 80px;
+            border-radius: 50%;
+            background: var(--gradient-overlay);
+            margin-bottom: 1.5rem;
+        }
+
+        .contribute-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .contribute-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .contribute-card p {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 6rem 2rem;
+            background-color: #f8f9fa;
+        }
+
+        .contact-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-top: 3rem;
+        }
+
+        .contact-info h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .team-members {
+            margin-top: 2rem;
+        }
+
+        .team-member {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .member-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            overflow: hidden;
+        }
+
+        .member-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .member-info h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .member-info p {
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        .contact-form {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .contact-form h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 4rem 2rem;
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .footer-logo span {
+            color: var(--secondary-color);
+        }
+
+        .footer-section h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-section h4::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background-color: var(--secondary-color);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: #d5d5d5;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .copyright {
+            margin-top: 4rem;
+            text-align: center;
+            color: #d5d5d5;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .about-content,
+            .contact-grid,
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .about-image {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                height: 100vh;
+                width: 70%;
+                flex-direction: column;
+                justify-content: center;
+                background-color: white;
+                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+                transition: all 0.5s ease;
+                z-index: 99;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links a {
+                padding: 1rem 2rem;
+                display: block;
+            }
+
+            .hamburger {
+                display: flex;
+                z-index: 100;
+            }
+
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(5px, -5px);
+            }
+
+            .method-step {
+                grid-template-columns: 1fr;
+            }
+
+            .step-number {
+                margin: 0 auto 1.5rem;
+            }
+
+            .ndwi-example {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .comparison-slider {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-wrapper">
+        <div class="bg"></div>
+        <!-- Ripples will be added with JS -->
     </div>
 
-    <!-- About Section -->
-    <section id="about" class="bg-white text-gray-800 py-16 px-6">
-      <div class="max-w-5xl mx-auto">
-        <h2 class="text-3xl font-bold mb-4">About the Project</h2>
-        <p class="text-lg mb-4">
-          FlowZero is a cloud-native pipeline that uses satellite imagery to monitor river flow in under-observed regions, helping us conserve water and protect ecosystems. It's built on open-source tools, Planet API, and modern geospatial analysis techniques.
-        </p>
-      </div>
-    </section>
-
-    <!-- Animated Lottie Section -->
-    <section class="bg-blue-50 py-12 px-6 text-center">
-      <h2 class="text-2xl font-bold mb-6 text-blue-800">Monitoring Rivers from Space</h2>
-      <lottie-player src="https://assets5.lottiefiles.com/packages/lf20_gjmecwii.json" background="transparent" speed="1" style="width: 300px; height: 300px; margin: auto;" loop autoplay></lottie-player>
-    </section>
-
-    <!-- Methodology -->
-    <section class="bg-green-50 py-16 px-6 text-gray-900">
-      <div class="max-w-5xl mx-auto">
-        <h2 class="text-3xl font-bold mb-4">How It Works</h2>
-        <ul class="list-disc pl-6 space-y-2 text-lg">
-          <li>Satellite imagery retrieved from Planet Labs APIs</li>
-          <li>NDWI and spectral analysis to detect water presence</li>
-          <li>Edge detection and thresholding for flow estimation</li>
-          <li>Outputs include visualizations, CSVs, and logs</li>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <i class="fas fa-water"></i>
+            Flow<span>Zero</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#methodology">Methodology</a></li>
+            <li><a href="#case-study">Case Study</a></li>
+            <li><a href="#cli">CLI Tool</a></li>
+            <li><a href="#data-outputs">Data & Outputs</a></li>
+            <li><a href="#get-involved">Get Involved</a></li>
+            <li><a href="#contact">Contact</a></li>
         </ul>
-      </div>
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>FlowZero</h1>
+            <p>Leveraging satellite imagery for proactive water management through geospatial analysis and machine learning.</p>
+            <div class="cta-buttons">
+                <a href="#" class="btn btn-primary">GitHub Repository</a>
+                <a href="#" class="btn btn-secondary">View Research Paper</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+        </div>
     </section>
 
-    <!-- Case Study -->
-    <section class="bg-white py-16 px-6 text-gray-800">
-      <div class="max-w-5xl mx-auto">
-        <h2 class="text-3xl font-bold mb-4">Case Study: Cosumnes River</h2>
-        <p class="text-lg mb-6">
-          The Cosumnes River study shows seasonal contrast between wet and dry months using FlowZero. Below are visualizations generated by the pipeline.
-        </p>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/81/Cosumnes_River_near_Merced_County.jpg" alt="Cosumnes River" class="rounded-lg shadow-lg mx-auto">
-      </div>
+    <!-- Core Features -->
+    <section id="features" class="features">
+        <div class="section-header">
+            <h2>Core Features</h2>
+            <p>Discover the powerful capabilities that make FlowZero an innovative solution for water management.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-satellite"></i>
+                </div>
+                <h3>NDWI-based Water Detection</h3>
+                <p>Accurately identify water bodies using the Normalized Difference Water Index (NDWI) from multi-spectral satellite imagery, providing reliable data even in remote areas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-cloud-download-alt"></i>
+                </div>
+                <h3>Automated Image Processing</h3>
+                <p>Streamlined pipeline for retrieving, preprocessing, and analyzing satellite imagery with minimal human intervention, ensuring consistent and reliable results.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-mask"></i>
+                </div>
+                <h3>Binary Water Masks</h3>
+                <p>Generate precise water extent maps through advanced thresholding techniques, enabling accurate flow estimation and change detection over time.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Time-series Visualizations</h3>
+                <p>Interactive temporal analysis tools to monitor water level changes, seasonal variations, and long-term trends for informed decision-making.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-terminal"></i>
+                </div>
+                <h3>CLI Tool</h3>
+                <p>Powerful command-line interface that ensures reproducibility and allows for easy integration into existing workflows and systems.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <h3>Cloud Infrastructure</h3>
+                <p>Built on AWS S3 and Planet API for scalable, efficient processing of large datasets across multiple watersheds simultaneously.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>About FlowZero</h2>
+                <p>FlowZero was developed at the <span class="highlight">University of San Francisco</span> in collaboration with <span class="highlight">The Nature Conservancy</span> to address the growing challenges of water resource management in the face of climate change.</p>
+                <p>Traditional stream gauges, while accurate, are expensive to deploy and maintain, leaving many critical waterways unmonitored. FlowZero bridges this gap by providing an open-source, cost-effective solution that leverages the power of satellite imagery and cloud computing.</p>
+                <p>Our mission is to democratize access to water monitoring data, enabling communities, researchers, and conservation organizations to make informed decisions about water resource management, flood prediction, and ecosystem protection.</p>
+                <a href="#methodology" class="btn btn-primary">Learn How It Works</a>
+            </div>
+            <div class="about-image">
+                <img src="/api/placeholder/600/400" alt="River monitoring with satellite imagery">
+            </div>
+        </div>
+    </section>
+
+    <!-- Methodology Section -->
+    <section id="methodology" class="methodology">
+        <div class="methodology-content">
+            <div class="section-header">
+                <h2>Our Methodology</h2>
+                <p>Discover the science and technology behind FlowZero's innovative approach to water monitoring.</p>
+            </div>
+            <div class="methods-container">
+                <div class="method-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Satellite Imagery Acquisition</h3>
+                        <p>FlowZero automatically queries and downloads high-resolution multi-spectral imagery from Planet Labs' satellite constellation through their API. The system is programmed to retrieve images at regular intervals or in response to specific events like rainfall or snowmelt.</p>
+                    </div>
+                </div>
+                <div class="method-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>NDWI Calculation</h3>
+                        <p>The Normalized Difference Water Index (NDWI) is calculated using the green and near-infrared (NIR) bands from the satellite imagery. This spectral index enhances the presence of water features while suppressing vegetation and soil signals.</p>
+                        <div class="ndwi-example">
+                            <figure class="ndwi-image">
+                                <img src="/api/placeholder/400/300" alt="Original satellite image">
+                                <figcaption>Original Satellite Image</figcaption>
+                            </figure>
+                            <figure class="ndwi-image">
+                                <img src="/api/placeholder/400/300" alt="NDWI processed image">
+                                <figcaption>NDWI Processed Image</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+                <div class="method-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Thresholding & Water Mask Generation</h3>
+                        <p>Advanced thresholding techniques like Otsu's method are applied to the NDWI images to separate water from non-water pixels. The result is a binary water mask that precisely delineates the water extent at the time of image capture.</p>
+                    </div>
+                </div>
+                <div class="method-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Time Series Analysis</h3>
+                        <p>By processing images from different dates, FlowZero creates a time series of water extent measurements. This temporal data reveals patterns in water level fluctuations, seasonal variations, and long-term trends that can inform management decisions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Case Study Section -->
+    <section id="case-study" class="case-study">
+        <div class="case-study-content">
+            <div class="section-header">
+                <h2>Cosumnes River Case Study</h2>
+                <p>See FlowZero in action through our comprehensive analysis of the Cosumnes River watershed in California.</p>
+            </div>
+            <div class="comparison-slider">
+                <img src="/api/placeholder/1200/500" alt="Cosumnes River during dry season">
+                <div class="slider-overlay">
+                    <p>Slide to compare dry and wet seasons</p>
+                </div>
+            </div>
+            <div class="time-series">
+                <h3>Water Level Time Series Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="waterLevelChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CLI Section -->
+    <section id="cli" class="cli">
+        <div class="cli-content">
+            <div class="section-header">
+                <h2>Command Line Interface</h2>
+                <p>A powerful, user-friendly CLI tool for automating water monitoring workflows.</p>
+            </div>
+            <div class="terminal">
+                <pre><span class="prompt">user@server:~$</span> <span class="command">flowzero --help</span>
+
+<span class="output">FlowZero CLI v1.0.0
+A tool for monitoring water levels using satellite imagery
+
+USAGE:
+  flowzero [COMMAND] [OPTIONS]
+
+COMMANDS:
+  fetch       Download satellite imagery for a specific region and date range
+  process     Process images using NDWI and generate water masks
+  analyze     Perform time series analysis on processed data
+  visualize   Create visualizations from analysis results
+  help        Display help information for a command</span>
+
+<span class="prompt">user@server:~$</span> <span class="command">flowzero fetch --region cosumnes --start-date 2024-01-01 --end-date 2024-04-01</span>
+
+<span class="output">Fetching imagery for Cosumnes River region
+Date range: 2024-01-01 to 2024-04-01
+Connecting to Planet API...
+Found 12 images matching criteria
+Downloading: [====================] 100% Complete
+Images saved to /data/cosumnes/raw/</span></pre>
+            </div>
+            <table class="cli-table">
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>fetch</td>
+                        <td>Download satellite imagery for specified region and time period</td>
+                        <td>flowzero fetch --region cosumnes --start-date 2024-01-01</td>
+                    </tr>
+                    <tr>
+                        <td>process</td>
+                        <td>Calculate NDWI and generate water masks from raw imagery</td>
+                        <td>flowzero process --input /data/raw --output /data/processed</td>
+                    </tr>
+                    <tr>
+                        <td>analyze</td>
+                        <td>Perform statistical analysis on processed data</td>
+                        <td>flowzero analyze --input /data/processed --method timeseries</td>
+                    </tr>
+                    <tr>
+                        <td>visualize</td>
+                        <td>Create plots, maps, and other visualizations</td>
+                        <td>flowzero visualize --type chart --data /data/analysis/results.csv</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="text-center" style="margin-top: 2rem;">
+                <a href="#" class="btn btn-primary">View Full Documentation</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data & Outputs Section -->
+    <section id="data-outputs" class="data-outputs">
+        <div class="data-content">
+            <div class="section-header">
+                <h2>Data & Outputs</h2>
+                <p>Explore the various data products and visualizations generated by FlowZero.</p>
+            </div>
+            <div class="output-gallery">
+                <div class="output-item">
+                    <img src="/api/placeholder/400/250" alt="Water detection map">
+                    <h4>Water Detection Maps</h4>
+                </div>
+                <div class="output-item">
+                    <img src="/api/placeholder/400/250" alt="Time series data visualization">
+                    <h4>Time Series Visualizations</h4>
+                </div>
+                <div class="output-item">
+                    <img src="/api/placeholder/400/250" alt="Change detection analysis">
+                    <h4>Change Detection Analysis</h4>
+                </div>
+                <div class="output-item">
+                    <img src="/api/placeholder/400/250" alt="Water extent CSV data">
+                    <h4>CSV Data Exports</h4>
+                </div>
+                <div class="output-item">
+                    <img src="/api/placeholder/400/250" alt="Watershed reports">
+                    <h4>Watershed Reports</h4>
+                </div>
+                <div class="output-item">
+                    <img src="/api/placeholder/400/250" alt="GIS compatible layers">
+                    <h4>GIS-Compatible Layers</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Get Involved Section -->
+    <section id="get-involved" class="get-involved">
+        <div class="involved-content">
+            <div class="section-header">
+                <h2>Get Involved</h2>
+                <p>Join our community and contribute to the development of FlowZero.</p>
+            </div>
+            <div class="contribute-cards">
+                <div class="contribute-card">
+                    <div class="contribute-icon">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <h3>Contribute Code</h3>
+                    <p>Help improve FlowZero by contributing code, fixing bugs, or adding new features through our GitHub repository.</p>
+                    <a href="#" class="btn btn-primary">GitHub Repo</a>
+                </div>
+                <div class="contribute-card">
+                    <div class="contribute-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h3>Provide Test Cases</h3>
+                    <p>Share data from your local watersheds to help validate and improve FlowZero's algorithms across different geographies.</p>
+                    <a href="#" class="btn btn-primary">Submit Data</a>
+                </div>
+                <div class="contribute-card">
+                    <div class="contribute-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3>Improve Documentation</h3>
+                    <p>Help make FlowZero more accessible by contributing to documentation, tutorials, and examples.</p>
+                    <a href="#" class="btn btn-primary">Documentation</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="contact-content">
+            <div class="section-header">
+                <h2>Contact Us</h2>
+                <p>Get in touch with the FlowZero team for questions, collaboration opportunities, or support.</p>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <h3>Project Team</h3>
+                    <p>FlowZero is developed by a dedicated team of researchers, developers, and conservation experts at the University of San Francisco in collaboration with The Nature Conservancy.</p>
+                    <div class="team-members">
+                        <div class="team-member">
+                            <div class="member-photo">
+                                <img src="/api/placeholder/60/60" alt="Team member photo">
+                            </div>
+                            <div class="member-info">
+                                <h4>Dr. Jane Smith</h4>
+                                <p>Lead Researcher, University of San Francisco</p>
+                            </div>
+                        </div>
+                        <div class="team-member">
+                            <div class="member-photo">
+                                <img src="/api/placeholder/60/60" alt="Team member photo">
+                            </div>
+                            <div class="member-info">
+                                <h4>Dr. Michael Johnson</h4>
+                                <p>Geospatial Scientist, The Nature Conservancy</p>
+                            </div>
+                        </div>
+                        <div class="team-member">
+                            <div class="member-photo">
+                                <img src="/api/placeholder/60/60" alt="Team member photo">
+                            </div>
+                            <div class="member-info">
+                                <h4>Sarah Williams</h4>
+                                <p>Lead Developer, University of San Francisco</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <h3>Send Us a Message</h3>
+                    <form>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" name="subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-200 py-8 px-6 text-center">
-      <p class="mb-2">&copy; 2025 FlowZero | Built with ❤️ at USF</p>
-      <a href="https://github.com/yourusername/flowzero" class="text-blue-400 hover:underline">View on GitHub</a>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <a href="#" class="footer-logo">Flow<span>Zero</span></a>
+                <p>An open-source project for monitoring water levels using satellite imagery and geospatial analysis.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Links</h4>
+                <ul class="footer-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#methodology">Methodology</a></li>
+                    <li><a href="#case-study">Case Study</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <ul class="footer-links">
+                    <li><a href="#">GitHub Repository</a></li>
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">Research Paper</a></li>
+                    <li><a href="#">The Nature Conservancy</a></li>
+                    <li><a href="#">University of San Francisco</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2025 FlowZero. All rights reserved.</p>
+        </div>
     </footer>
-  </body>
+
+    <!-- JavaScript -->
+    <script>
+        // Create ripple effect in background
+        function createRipples() {
+            const bgWrapper = document.querySelector('.bg-wrapper');
+            
+            for (let i = 0; i < 5; i++) {
+                const ripple = document.createElement('div');
+                ripple.classList.add('ripple');
+                
+                // Random positioning
+                const size = Math.random() * 300 + 100;
+                ripple.style.width = `${size}px`;
+                ripple.style.height = `${size}px`;
+                ripple.style.left = `${Math.random() * 100}%`;
+                ripple.style.top = `${Math.random() * 100}%`;
+                
+                // Random animation delay
+                ripple.style.animationDelay = `${Math.random() * 5}s`;
+                
+                bgWrapper.appendChild(ripple);
+                
+                // Remove and create new ripple after animation completes
+                ripple.addEventListener('animationend', () => {
+                    ripple.remove();
+                    createSingleRipple();
+                });
+            }
+        }
+        
+        function createSingleRipple() {
+            const bgWrapper = document.querySelector('.bg-wrapper');
+            const ripple = document.createElement('div');
+            ripple.classList.add('ripple');
+            
+            // Random positioning
+            const size = Math.random() * 300 + 100;
+            ripple.style.width = `${size}px`;
+            ripple.style.height = `${size}px`;
+            ripple.style.left = `${Math.random() * 100}%`;
+            ripple.style.top = `${Math.random() * 100}%`;
+            
+            bgWrapper.appendChild(ripple);
+            
+            // Remove and create new ripple after animation completes
+            ripple.addEventListener('animationend', () => {
+                ripple.remove();
+                createSingleRipple();
+            });
+        }
+        
+        // Mobile navigation toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+        
+        // Sticky navigation on scroll
+        const navbar = document.querySelector('.navbar');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Animate methodology steps on scroll
+        function animateMethodSteps() {
+            const methodSteps = document.querySelectorAll('.method-step');
+            
+            methodSteps.forEach((step, index) => {
+                gsap.to(step, {
+                    scrollTrigger: {
+                        trigger: step,
+                        start: "top 80%",
+                        end: "bottom 20%",
+                        toggleActions: "play none none none"
+                    },
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.6,
+                    delay: index * 0.2
+                });
+            });
+        }
+        
+        // Water level chart
+        function createWaterLevelChart() {
+            const ctx = document.getElementById('waterLevelChart').getContext('2d');
+            
+            // Sample data - replace with actual data in production
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const waterLevelData = [65, 70, 80, 85, 75, 60, 50, 45, 40, 50, 55, 60];
+            const rainfallData = [120, 110, 90, 60, 30, 10, 5, 5, 15, 30, 70, 100];
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Water Level (m²)',
+                            data: waterLevelData,
+                            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Rainfall (mm)',
+                            data: rainfallData,
+                            backgroundColor: 'rgba(39, 174, 96, 0.2)',
+                            borderColor: 'rgba(39, 174, 96, 1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Cosumnes River Water Levels (2024)',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Water Surface Area (m²)'
+                            }
+                        },
+                        y1: {
+                            position: 'right',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Rainfall (mm)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Initialize functions when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            createRipples();
+            
+            if (typeof gsap !== 'undefined' && gsap.registerPlugin) {
+                gsap.registerPlugin(ScrollTrigger);
+                animateMethodSteps();
+            }
+            
+            if (typeof Chart !== 'undefined') {
+                createWaterLevelChart();
+            }
+        });
+    </script>
+</body>
 </html>
