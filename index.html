@@ -474,6 +474,28 @@
         background-color: #f8f9fa;
         font-weight: 500;
     }
+        .ts-image {
+        margin: 2rem auto; /* center horizontally with spacing */
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        max-width: 90%; /* prevents it from being too wide */
+        text-align: center;
+    }
+    
+    .ts-image img {
+        width: 100%; /* scale to fit container */
+        height: auto;
+        display: block;
+        margin: 0 auto; /* ensure centering if needed */
+    }
+    
+    .ts-image figcaption {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        font-weight: 500;
+}
+
 
 
         /* Case Study Section */
@@ -1173,13 +1195,15 @@
                         <p>Advanced thresholding techniques like Otsu's method are applied to the NDWI images to separate water from non-water pixels. The result is a binary water mask that precisely delineates the water extent at the time of image capture.</p>
                     </div>
                 </div>
-                <div class="method-step">
-                    <div class="step-number">4</div>
-                    <div class="step-content">
-                        <h3>Time Series Analysis</h3>
-                        <p>By processing images from different dates, FlowZero creates a time series of water extent measurements. This temporal data reveals patterns in water level fluctuations, seasonal variations, and long-term trends that can inform management decisions.</p>
-                    </div>
-                </div>
+               <div class="method-step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+                <h3>Time Series Analysis</h3>
+                <p>By processing images from different dates, FlowZero creates a time series of water extent measurements. This temporal data reveals patterns in water level fluctuations, seasonal variations, and long-term trends that can inform management decisions.</p>
+                <figure class="ts-image">
+                    <img src="cosumnes_flow.png" alt="Cosumnes River time series plot">
+                    <figcaption>Time series of water extent in the Cosumnes River</figcaption>
+                </figure>
             </div>
         </div>
     </section>
